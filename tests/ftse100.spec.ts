@@ -92,4 +92,55 @@ test.describe('FTSE 100', () => {
     );
     console.table(mCapOverSevenBillion)
   });
+
+  test('month over the past three years recorded the lowest average index value', async() => {
+    await expect(FTSE100Page).toHaveURL(
+      /\/indices\/ftse-100\/constituents\/table/,
+      { ignoreCase: true, timeout: 20000 }
+    );
+
+    const today: Date = new Date()
+    today.setFullYear(today.getFullYear() - 3)
+    const fromDate: Date =  today   
+    
+    await FTSE100Page.getByRole('link', { name: 'Overview' }).click()
+
+    await FTSE100Page.waitForLoadState('domcontentloaded', {timeout: 10000})
+
+    await expect(FTSE100Page.locator('#w-advanced-chart-widget')).toBeVisible({timeout: 10000})
+
+    // Select the from data
+    await FTSE100Page.getByRole('textbox', { name: 'Day in from date' }).fill(fromDate.getDate().toString().padStart(2, '0'))
+    await FTSE100Page.getByRole('textbox', { name: 'Month in from date' }).fill(( fromDate.getMonth()+1 ).toString().padStart(2, '0'))
+    await FTSE100Page.getByRole('textbox', { name: 'Year in from date' }).fill(fromDate.getFullYear().toString())
+
+    await FTSE100Page.keyboard.press('Enter')
+
+
+    //Select monthly from drop down
+    await FTSE100Page.getByRole('button', { name: /(Daily|Weekly|Monthly) Periodicity/ }).click()
+    await FTSE100Page.getByRole('menuitem', { name: 'Monthly' }).click()
+
+    const response = await FTSE100Page.waitForResponse(resp => 
+      resp.url().includes('/rest/api/timeseries/historical') && 
+      resp.request().method() == 'GET' && resp.status() == 200
+    )
+
+    let responseBody: any =  await response.json()
+
+  type data = { [key: string]: any; CLOSE_PRC: string; _DATE_END: string };
+    const result: data = responseBody.data.reduce(
+      (min: data, curr: data) =>
+        parseFloat(curr['CLOSE_PRC']) < parseFloat(min['CLOSE_PRC']) ? curr : min
+    );
+
+    const lowestAvgIndexValue: string = result['CLOSE_PRC']
+    const date: Date = new Date(result['_DATE_END']);
+    const month = date.toLocaleDateString('default', {month: 'long'})
+    const year = date.getFullYear()
+
+    console.log(`${month}, ${year} had the lowest avereage index value over the past three years with ${lowestAvgIndexValue}`)
+
+    
+  })
 });
