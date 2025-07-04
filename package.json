@@ -4,13 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:pw": "playwright test --config=playwright.config.ts --project=chromium"
+    "pretest": "tsc --incremental -p tsconfig.json",
+    "test:pw": "playwright test  --config=playwright.config.ts --project=chromium"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.53.2",
-    "@types/node": "^24.0.8"
+    "@types/node": "^24.0.10",
+    "prettier": "^3.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }

@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "commonjs",
+        "strict": true,
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "outDir": "./tests-out",
+        "rootDir": ".",
+    },
+    "exclude": [
+        "node_modules",
+        "tests-out"
+    ],
+    "include": [
+        "tests/**/*.ts"
+    ]
+}
